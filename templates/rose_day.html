@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Rose Day - Feb 7{% endblock %}
+
+{% block content %}
+<div class="text-center relative z-10 select-none cursor-pointer w-full h-full min-h-[80vh] flex flex-col items-center justify-center"
+    id="click-area">
+    <h1 class="text-6xl md:text-8xl font-dancing text-red-600 mb-8 animate-float drop-shadow-lg">
+        Grow a Bouquet
+    </h1>
+    <p
+        class="text-xl text-gray-700 dark:text-gray-300 mb-8 bg-white/50 dark:bg-black/50 p-4 rounded-xl backdrop-blur-sm">
+        Tap anywhere to plant a rose and discover a reason why I love you.
+    </p>
+
+    <!-- Container for Roses -->
+    <div id="garden" class="fixed inset-0 pointer-events-none overflow-hidden"></div>
+</div>
+
+<script>
+    const garden = document.getElementById('garden');
+    const clickArea = document.getElementById('click-area');
+    const colors = ['text-red-500', 'text-pink-500', 'text-rose-500', 'text-red-600'];
+
+    let clickCount = 0;
+    let reasonsList = [];
+    const MAX_ROSES = 20;
+
+    async function loadReasons() {
+        try {
+            const response = await fetch('/api/reasons');
+            const data = await response.json();
+            reasonsList = data.reasons;
+        } catch (e) {
+            console.error("Failed to load reasons");
+            // Fallback
+            for (let i = 0; i < MAX_ROSES; i++) reasonsList.push(`Reason #${i + 1}: I love you!`);
+        }
+    }
+    loadReasons();
+
+    function plantRose(x, y) {
+        if (clickCount >= MAX_ROSES) return;
+
+        clickCount++;
+
+        // Create Rose
+        const rose = document.createElement('div');
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        rose.className = `absolute text-5xl md:text-7xl ${color} rose-element transform scale-0 transition-transform duration-500 ease-out drop-shadow-xl z-20`;
+        rose.style.left = `${x}px`;
+        rose.style.top = `${y}px`;
+        rose.innerHTML = '<i class="fas fa-rose"></i>';
+        rose.dataset.id = clickCount;
+
+        // Random rotation
+        const rotation = Math.random() * 60 - 30;
+        rose.style.transform = `translate(-50%, -50%) rotate(${rotation}deg) scale(0)`;
+
+        garden.appendChild(rose);
+
+        // Animate in
+        requestAnimationFrame(() => {
+            rose.style.transform = `translate(-50%, -50%) rotate(${rotation}deg) scale(1)`;
+        });
+
+        // Create Floating Text
+        const reasonText = reasonsList[clickCount - 1] || "I love you so much!";
+        const text = document.createElement('div');
+        text.className = 'absolute text-lg md:text-xl font-dancing text-valentine-900 dark:text-valentine-100 font-bold pointer-events-none animate-float opacity-0 transition-opacity duration-500 z-30 bg-white/70 dark:bg-black/70 px-4 py-2 rounded-full whitespace-nowrap';
+        text.style.left = `${x}px`;
+        text.style.top = `${y - 60}px`;
+        text.style.transform = 'translateX(-50%)';
+        text.innerText = `${clickCount}. ${reasonText}`;
+        text.style.textShadow = '0 2px 4px rgba(0,0,0,0.1)';
+
+        garden.appendChild(text);
+
+        requestAnimationFrame(() => {
+            text.classList.remove('opacity-0');
+        });
+
+        // Cleanup text after a while (Roses stay!)
+        setTimeout(() => {
+            text.classList.add('opacity-0');
+            setTimeout(() => text.remove(), 500);
+        }, 4000);
+    }
+
+    document.addEventListener('click', (e) => {
+        // Prevent triggering on nav or buttons
+        if (e.target.closest('button') || e.target.closest('a') || e.target.closest('nav')) return;
+
+        plantRose(e.clientX, e.clientY);
+    });
+
+    // Touch support
+    document.addEventListener('touchstart', (e) => {
+        if (e.target.closest('button') || e.target.closest('a') || e.target.closest('nav')) return;
+
+        const touch = e.touches[0];
+        plantRose(touch.clientX, touch.clientY);
+    }, { passive: true });
+</script>
+{% endblock %}

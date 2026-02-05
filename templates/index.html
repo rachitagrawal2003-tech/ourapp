@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Valentine's Dashboard{% endblock %}
+
+{% block content %}
+<div class="text-center mb-12">
+    <h1 class="text-5xl md:text-7xl font-dancing text-valentine-700 dark:text-valentine-300 mb-4 animate-float">
+        Valentine's Week
+    </h1>
+    <p class="text-xl text-valentine-800 dark:text-valentine-200 font-poppins">
+        One week, infinite memories.
+    </p>
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-6xl">
+    {% for day in days %}
+    <a href="{{ day.link }}"
+        class="group relative glass rounded-xl p-6 transition-all duration-300 hover:scale-105 hover:shadow-xl overflow-hidden">
+        <div
+            class="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        </div>
+
+        <div class="relative z-10 flex flex-col items-center justify-center h-48">
+            <div
+                class="text-4xl mb-4 transform group-hover:scale-125 transition-transform duration-300 {{ day.color }}">
+                <i class="fas {{ day.icon }}"></i>
+            </div>
+            <h2 class="text-2xl font-dancing font-bold text-gray-800 dark:text-white mb-1">{{ day.title }}</h2>
+            <span
+                class="text-sm font-poppins text-gray-600 dark:text-gray-300 bg-valentine-100 dark:bg-gray-700 px-3 py-1 rounded-full">
+                {{ day.date }}
+            </span>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block title %}Valentine's Day - Feb 14{% endblock %}
+
+{% block content %}
+<div class="flex flex-col items-center justify-center w-full max-w-4xl mx-auto px-4">
+
+    <h1 class="text-5xl md:text-7xl font-dancing text-red-600 mb-8 animate-float text-center">
+        Happy Valentine's Day!
+    </h1>
+
+    <!-- Video Player -->
+    <div class="w-full aspect-video glass rounded-2xl overflow-hidden shadow-2xl mb-12 border-4 border-white/50">
+        <video controls class="w-full h-full object-cover">
+            <source src="/assets/video_montage.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <!-- Time Capsule Section -->
+    <div class="text-center w-full">
+        <button id="seal-btn"
+            class="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white font-bold py-4 px-10 rounded-full shadow-lg text-xl transform transition hover:scale-105 mb-8">
+            <i class="fas fa-hourglass-start mr-2"></i> Seal Our Love
+        </button>
+
+        <div id="timer-display" class="hidden glass p-8 rounded-xl max-w-2xl mx-auto animate-fade-in-up">
+            <h2 class="text-3xl font-dancing text-valentine-800 dark:text-valentine-200 mb-4">Our Love Story</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <div class="p-4 bg-white/50 dark:bg-black/20 rounded-lg">
+                    <span id="days" class="block text-4xl font-bold text-red-500">0</span>
+                    <span class="text-sm uppercase tracking-wide">Days</span>
+                </div>
+                <div class="p-4 bg-white/50 dark:bg-black/20 rounded-lg">
+                    <span id="hours" class="block text-4xl font-bold text-pink-500">0</span>
+                    <span class="text-sm uppercase tracking-wide">Hours</span>
+                </div>
+                <div class="p-4 bg-white/50 dark:bg-black/20 rounded-lg">
+                    <span id="minutes" class="block text-4xl font-bold text-rose-500">0</span>
+                    <span class="text-sm uppercase tracking-wide">Minutes</span>
+                </div>
+                <div class="p-4 bg-white/50 dark:bg-black/20 rounded-lg">
+                    <span id="seconds" class="block text-4xl font-bold text-red-600">0</span>
+                    <span class="text-sm uppercase tracking-wide">Seconds</span>
+                </div>
+            </div>
+            <p class="mt-6 text-lg italic text-gray-600 dark:text-gray-300">
+                ...and counting forever.
+            </p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const sealBtn = document.getElementById('seal-btn');
+    const timerDisplay = document.getElementById('timer-display');
+
+    // Check localStorage for existing start time
+    let savedStartTime = localStorage.getItem('valentineStart');
+    let startDate;
+
+    if (savedStartTime) {
+        // If already started, restore state
+        startDate = new Date(parseInt(savedStartTime));
+        showTimer();
+    }
+
+    function updateTimer() {
+        if (!startDate) return;
+        const now = new Date();
+        const diff = now - startDate;
+
+        // Prevent negative values just in case
+        if (diff < 0) return;
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        document.getElementById('days').innerText = days;
+        document.getElementById('hours').innerText = hours;
+        document.getElementById('minutes').innerText = minutes;
+        document.getElementById('seconds').innerText = seconds;
+    }
+
+    function showTimer() {
+        sealBtn.classList.add('hidden');
+        timerDisplay.classList.remove('hidden');
+        timerDisplay.classList.remove('opacity-0');
+
+        // Update label
+        document.querySelector('#timer-display h2').innerText = "Time since we have been valentines";
+
+        updateTimer();
+        setInterval(updateTimer, 1000);
+    }
+
+    sealBtn.addEventListener('click', () => {
+        // Set start date to NOW
+        const now = Date.now();
+        localStorage.setItem('valentineStart', now);
+        startDate = new Date(now);
+
+        showTimer();
+
+        // Confetti burst
+        // Re-using logic if available or simple burst
+    });
+</script>
+{% endblock %}

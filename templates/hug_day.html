@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Hug Day - Feb 12{% endblock %}
+
+{% block content %}
+<div class="flex flex-col items-center justify-center min-h-[70vh] w-full">
+
+    <h1
+        class="text-4xl md:text-6xl font-dancing text-valentine-800 dark:text-valentine-200 mb-12 text-center animate-float">
+        Sending you a warm hug!
+    </h1>
+
+    <div id="heart-btn" class="relative cursor-pointer group select-none">
+        <!-- Pulse Rings -->
+        <div class="absolute inset-0 bg-red-500 rounded-full animate-ping opacity-20"></div>
+        <div class="absolute inset-0 bg-red-500 rounded-full animate-ping opacity-20 delay-75"></div>
+
+        <!-- Main Heart -->
+        <i
+            class="fas fa-heart text-[8rem] md:text-[12rem] text-red-500 transition-transform duration-200 group-hover:scale-110 group-active:scale-95 filter drop-shadow-2xl"></i>
+    </div>
+
+    <p class="mt-12 text-lg text-gray-600 dark:text-gray-300">Tap to feel the hug</p>
+
+</div>
+
+<script>
+    const heartBtn = document.getElementById('heart-btn');
+
+    function vibrate() {
+        if (navigator.vibrate) {
+            // Heartbeat pattern
+            navigator.vibrate([200, 100, 200]);
+        }
+    }
+
+    function createParticles(x, y) {
+        for (let i = 0; i < 20; i++) {
+            const particle = document.createElement('i');
+            particle.classList.add('fas', 'fa-heart', 'fixed', 'text-red-500', 'pointer-events-none', 'z-50');
+            particle.style.fontSize = Math.random() * 20 + 10 + 'px';
+            particle.style.left = x + 'px';
+            particle.style.top = y + 'px';
+
+            document.body.appendChild(particle);
+
+            // Random direction
+            const angle = Math.random() * Math.PI * 2;
+            const velocity = Math.random() * 150 + 50;
+            const tx = Math.cos(angle) * velocity;
+            const ty = Math.sin(angle) * velocity;
+
+            particle.animate([
+                { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+                { transform: `translate(${tx}px, ${ty}px) scale(0)`, opacity: 0 }
+            ], {
+                duration: 1000,
+                easing: 'cubic-bezier(0, .9, .57, 1)'
+            }).onfinish = () => particle.remove();
+        }
+    }
+
+    heartBtn.addEventListener('click', (e) => {
+        vibrate();
+
+        let clientX, clientY;
+        // Check if event is mouse or touch (click can be either triggered)
+        // Usually click gives clientX/Y
+        clientX = e.clientX;
+        clientY = e.clientY;
+
+        if (!clientX && !clientY) {
+            // If triggered by keyboard or some logic where coords miss, center it
+            const rect = heartBtn.getBoundingClientRect();
+            clientX = rect.left + rect.width / 2;
+            clientY = rect.top + rect.height / 2;
+        }
+
+        createParticles(clientX, clientY);
+
+        // Visual feedback
+        const heart = heartBtn.querySelector('i');
+        heart.classList.add('text-red-600');
+        setTimeout(() => heart.classList.remove('text-red-600'), 200);
+    });
+
+    // Support for direct touch to handle mobile better re: vibration permissions often needing user gesture
+    heartBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault(); // Prevent double firing with click
+        vibrate();
+        const touch = e.touches[0];
+        createParticles(touch.clientX, touch.clientY);
+    }, { passive: false });
+
+</script>
+{% endblock %}
