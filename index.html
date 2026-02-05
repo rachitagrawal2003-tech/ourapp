@@ -328,10 +328,17 @@
 
                 if (now < date) {
                     // Locked
-                    if (!el.querySelector('.locked-overlay')) {
-                        el.classList.add('cursor-not-allowed'); // Change cursor, but keep pointer events for hover effects if needed (though overlay blocks)
+                    // 1. Disable the link functionally
+                    if (el.getAttribute('href') && el.getAttribute('href') !== 'javascript:void(0)') {
+                        el.dataset.originalHref = el.getAttribute('href');
+                        el.setAttribute('href', 'javascript:void(0)');
+                    }
 
-                        const dayName = el.querySelector('h2').innerText; // Get the day name (e.g., "Rose Day")
+                    // 2. Add Visual Overlay if missing
+                    if (!el.querySelector('.locked-overlay')) {
+                        el.classList.add('cursor-not-allowed');
+
+                        const dayName = el.querySelector('h2').innerText;
 
                         const overlay = document.createElement('div');
                         overlay.className = 'locked-overlay rounded-xl';
@@ -349,7 +356,7 @@
                         el.appendChild(overlay);
                     }
 
-                    // Update countdown text
+                    // 3. Update countdown text
                     const diff = date - now;
                     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
                     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -363,6 +370,12 @@
 
                 } else {
                     // Unlocked
+                    // 1. Restore link functionality
+                    if (el.getAttribute('href') === 'javascript:void(0)' && el.dataset.originalHref) {
+                        el.setAttribute('href', el.dataset.originalHref);
+                    }
+
+                    // 2. Remove visuals
                     el.classList.remove('cursor-not-allowed');
                     const overlay = el.querySelector('.locked-overlay');
                     if (overlay) overlay.remove();
