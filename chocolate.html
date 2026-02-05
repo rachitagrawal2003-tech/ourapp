@@ -65,8 +65,8 @@
                         <i class="fas fa-ticket-alt text-6xl text-yellow-500 mb-4 animate-pulse"></i>
                         <h3 class="text-2xl font-bold text-amber-800 dark:text-amber-500 mb-4">Golden Ticket</h3>
                         <a href="https://open.spotify.com/playlist/5ofsPCZQATe612aMSyAJMh?si=uq-2Yne8QN2XPT0qSLnwdg&pi=rrOGA8rDQhio-"
-                            target="_blank"
-                            class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-full transition-transform hover:scale-105 z-20 relative">Claim
+                            target="_blank" id="spotify-btn"
+                            class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-full transition-all duration-500 hover:scale-105 z-20 relative opacity-0 translate-y-4 pointer-events-none">Claim
                             on Spotify <i class="fab fa-spotify ml-2"></i></a>
                     </div>
                     <canvas id="scratch2" class="absolute inset-0 w-full h-full cursor-pointer"></canvas>
@@ -82,15 +82,96 @@
         function createHeart() { const heart = document.createElement('div'); heart.classList.add('absolute', 'text-valentine-300', 'dark:text-valentine-800', 'opacity-20', 'animate-float'); heart.style.left = Math.random() * 100 + 'vw'; heart.style.animationDuration = Math.random() * 3 + 2 + 's'; heart.style.fontSize = Math.random() * 20 + 10 + 'px'; heart.innerHTML = '<i class="fas fa-heart"></i>'; heart.style.top = '100vh'; document.getElementById('bg-hearts').appendChild(heart); let pos = 100; const interval = setInterval(() => { if (pos < -10) { clearInterval(interval); heart.remove(); } else { pos -= 0.5; heart.style.top = pos + 'vh'; } }, 50); } setInterval(createHeart, 500);
 
         function setupScratchCard(canvasId, overlayColor = '#b45309') {
-            const canvas = document.getElementById(canvasId); const ctx = canvas.getContext('2d'); let isDrawing = false;
-            function resize() { const rect = canvas.getBoundingClientRect(); canvas.width = rect.width; canvas.height = rect.height; ctx.fillStyle = overlayColor; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = '#ffffff'; ctx.font = '30px "Dancing Script"'; ctx.textAlign = 'center'; ctx.fillText("Scratch Me!", canvas.width / 2, canvas.height / 2); }
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            let isDrawing = false;
+            let scratchedPixels = 0;
+            const totalPixels = 0;
+
+            function resize() {
+                const rect = canvas.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+                ctx.fillStyle = overlayColor;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '30px "Dancing Script"';
+                ctx.textAlign = 'center';
+                ctx.fillText("Scratch Me!", canvas.width / 2, canvas.height / 2);
+            }
             resize();
-            function getMousePos(e) { const rect = canvas.getBoundingClientRect(); let clientX, clientY; if (e.changedTouches) { clientX = e.changedTouches[0].clientX; clientY = e.changedTouches[0].clientY; } else { clientX = e.clientX; clientY = e.clientY; } return { x: clientX - rect.left, y: clientY - rect.top }; }
-            function scratch(e) { if (!isDrawing) return; e.preventDefault(); const pos = getMousePos(e); ctx.globalCompositeOperation = 'destination-out'; ctx.beginPath(); ctx.arc(pos.x, pos.y, 30, 0, Math.PI * 2); ctx.fill(); }
-            canvas.addEventListener('mousedown', (e) => { isDrawing = true; scratch(e); }); canvas.addEventListener('mousemove', scratch); canvas.addEventListener('mouseup', () => isDrawing = false); canvas.addEventListener('mouseout', () => isDrawing = false);
-            canvas.addEventListener('touchstart', (e) => { isDrawing = true; scratch(e); }, { passive: false }); canvas.addEventListener('touchmove', scratch, { passive: false }); canvas.addEventListener('touchend', () => isDrawing = false);
+
+            function getMousePos(e) {
+                const rect = canvas.getBoundingClientRect();
+                let clientX, clientY;
+                if (e.changedTouches) {
+                    clientX = e.changedTouches[0].clientX;
+                    clientY = e.changedTouches[0].clientY;
+                } else {
+                    clientX = e.clientX;
+                    clientY = e.clientY;
+                }
+                return { x: clientX - rect.left, y: clientY - rect.top };
+            }
+
+            function checkReveal() {
+                // Determine how much is scratched
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const pixels = imageData.data;
+                let transparentPixels = 0;
+
+                // Check every 4th pixel (alpha)
+                for (let i = 3; i < pixels.length; i += 4) {
+                    if (pixels[i] < 128) { // Less than 50% opacity
+                        transparentPixels++;
+                    }
+                }
+
+                const percentage = (transparentPixels / (pixels.length / 4)) * 100;
+
+                if (percentage > 40) { // If 40% scratched
+                    if (canvasId === 'scratch2') {
+                        const btn = document.getElementById('spotify-btn');
+                        btn.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+                    }
+                    // Fade out canvas completely for better UX
+                    canvas.style.transition = 'opacity 1s';
+                    canvas.style.opacity = '0';
+                    setTimeout(() => canvas.remove(), 1000);
+                }
+            }
+
+            // Checking reveal on mouseup/touchend to avoid heavy calc on every move
+            function stopDrawing() {
+                if (isDrawing) {
+                    isDrawing = false;
+                    checkReveal();
+                }
+            }
+
+            function scratch(e) {
+                if (!isDrawing) return;
+                e.preventDefault();
+                const pos = getMousePos(e);
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, 30, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            canvas.addEventListener('mousedown', (e) => { isDrawing = true; scratch(e); });
+            canvas.addEventListener('mousemove', scratch);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+
+            canvas.addEventListener('touchstart', (e) => { isDrawing = true; scratch(e); }, { passive: false });
+            canvas.addEventListener('touchmove', scratch, { passive: false });
+            canvas.addEventListener('touchend', stopDrawing);
         }
-        setTimeout(() => { setupScratchCard('scratch1', '#78350f'); setupScratchCard('scratch2', '#d97706'); }, 100);
+        setTimeout(() => {
+            setupScratchCard('scratch1', '#78350f');
+            setupScratchCard('scratch2', '#d97706');
+        }, 100);
     </script>
 </body>
 

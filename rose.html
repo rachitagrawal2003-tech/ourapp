@@ -159,6 +159,8 @@
         const colors = ['text-red-500', 'text-pink-500', 'text-rose-500', 'text-red-600'];
 
         let clickCount = 0;
+        let isPlanting = false; // Debounce flag
+
         // Embedded Reasons from reasons.txt
         const reasonsList = [
             "you get me waffles hehehe",
@@ -185,7 +187,10 @@
         const MAX_ROSES = 20;
 
         function plantRose(x, y) {
-            if (clickCount >= MAX_ROSES) return;
+            if (clickCount >= MAX_ROSES || isPlanting) return;
+
+            isPlanting = true;
+            setTimeout(() => { isPlanting = false; }, 300); // 300ms Cooldown
 
             clickCount++;
 
@@ -238,9 +243,10 @@
 
         document.addEventListener('touchstart', (e) => {
             if (e.target.closest('button') || e.target.closest('a') || e.target.closest('nav')) return;
+            e.preventDefault(); // Prevent Mouse Emulation
             const touch = e.touches[0];
             plantRose(touch.clientX, touch.clientY);
-        }, { passive: true });
+        }, { passive: false }); // Passive false required for preventDefault
     </script>
 </body>
 
