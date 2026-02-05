@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}My Valentine{% endblock %}</title>
+    <title>Rose Day - Feb 7</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -61,21 +61,18 @@
             }
         }
     </style>
-    {% block extra_css %}{% endblock %}
 </head>
 
 <body
     class="bg-valentine-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-poppins min-h-screen transition-colors duration-300 overflow-x-hidden">
 
-    <!-- Floating Hearts Background (CSS only implementation for simplicity first impact) -->
-    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden" id="bg-hearts">
-        <!-- JS will populate particles here -->
-    </div>
+    <!-- Background -->
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden" id="bg-hearts"></div>
 
-    <!-- Navigation/Header -->
+    <!-- Navigation -->
     <nav class="fixed top-0 w-full z-50 glass shadow-sm">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="/"
+            <a href="index.html"
                 class="text-2xl font-dancing font-bold text-valentine-600 dark:text-valentine-400 hover:scale-110 transition-transform">
                 <i class="fas fa-heart text-red-500 animate-pulse"></i> Valentine's Week
             </a>
@@ -91,7 +88,21 @@
     <!-- Main Content -->
     <main
         class="relative z-10 pt-20 pb-10 container mx-auto px-4 min-h-screen flex flex-col justify-center items-center">
-        {% block content %}{% endblock %}
+
+        <div class="text-center relative z-10 select-none cursor-pointer w-full h-full min-h-[80vh] flex flex-col items-center justify-center"
+            id="click-area">
+            <h1 class="text-6xl md:text-8xl font-dancing text-red-600 mb-8 animate-float drop-shadow-lg">
+                Grow a Bouquet
+            </h1>
+            <p
+                class="text-xl text-gray-700 dark:text-gray-300 mb-8 bg-white/50 dark:bg-black/50 p-4 rounded-xl backdrop-blur-sm">
+                Tap anywhere to plant a rose and discover a reason why I love you.
+            </p>
+
+            <!-- Container for Roses -->
+            <div id="garden" class="fixed inset-0 pointer-events-none overflow-hidden"></div>
+        </div>
+
     </main>
 
     <!-- Footer -->
@@ -104,8 +115,6 @@
         const themeToggle = document.getElementById('theme-toggle');
         const html = document.documentElement;
 
-        // Default to Light (User request)
-        // Only set dark if explicitly stored as 'dark'
         if (localStorage.theme === 'dark') {
             html.classList.add('dark');
         } else {
@@ -130,10 +139,7 @@
             heart.style.fontSize = Math.random() * 20 + 10 + 'px';
             heart.innerHTML = '<i class="fas fa-heart"></i>';
             heart.style.top = '100vh';
-
             document.getElementById('bg-hearts').appendChild(heart);
-
-            // Simple animation loop for rising
             let pos = 100;
             const interval = setInterval(() => {
                 if (pos < -10) {
@@ -145,10 +151,97 @@
                 }
             }, 50);
         }
-
         setInterval(createHeart, 500);
+
+        // Rose Day Logic
+        const garden = document.getElementById('garden');
+        const clickArea = document.getElementById('click-area');
+        const colors = ['text-red-500', 'text-pink-500', 'text-rose-500', 'text-red-600'];
+
+        let clickCount = 0;
+        // Embedded Reasons from reasons.txt
+        const reasonsList = [
+            "you get me waffles hehehe",
+            "you have the prettiest eyes every",
+            "you always look out for me",
+            "you teach me about a lot of things",
+            "you care so much about me",
+            "you cook for me",
+            "you get me food when I am in delhi",
+            "you send me cute cute selfies",
+            "you have the most beautiful hair",
+            "you love me even when i am bald lmao",
+            "you compliment me regularly (mean kam hua kro please)",
+            "you support me a lot",
+            "you notice things",
+            "you are always grateful for things i do for you",
+            "you care about my family too",
+            "yours hands are so soft",
+            "youre so freaky too love it lmfao",
+            "tumhe cuddle karna is so fun",
+            "you proposed me in the best way heheheheh",
+            "you are kuchiepuchieee muah muahhh"
+        ];
+        const MAX_ROSES = 20;
+
+        function plantRose(x, y) {
+            if (clickCount >= MAX_ROSES) return;
+
+            clickCount++;
+
+            // Create Rose
+            const rose = document.createElement('div');
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            rose.className = `absolute text-5xl md:text-7xl ${color} rose-element transform scale-0 transition-transform duration-500 ease-out drop-shadow-xl z-20`;
+            rose.style.left = `${x}px`;
+            rose.style.top = `${y}px`;
+            rose.innerHTML = '<i class="fas fa-rose"></i>';
+            rose.dataset.id = clickCount;
+
+            // Random rotation
+            const rotation = Math.random() * 60 - 30;
+            rose.style.transform = `translate(-50%, -50%) rotate(${rotation}deg) scale(0)`;
+
+            garden.appendChild(rose);
+
+            requestAnimationFrame(() => {
+                rose.style.transform = `translate(-50%, -50%) rotate(${rotation}deg) scale(1)`;
+            });
+
+            // Create Floating Text
+            const reasonText = reasonsList[clickCount - 1] || "I love you so much!";
+            const text = document.createElement('div');
+            text.className = 'absolute text-lg md:text-xl font-dancing text-valentine-900 dark:text-valentine-100 font-bold pointer-events-none animate-float opacity-0 transition-opacity duration-500 z-30 bg-white/70 dark:bg-black/70 px-4 py-2 rounded-full whitespace-nowrap';
+            text.style.left = `${x}px`;
+            text.style.top = `${y - 60}px`;
+            text.style.transform = 'translateX(-50%)';
+            text.innerText = `${clickCount}. ${reasonText}`;
+            text.style.textShadow = '0 2px 4px rgba(0,0,0,0.1)';
+
+            garden.appendChild(text);
+
+            requestAnimationFrame(() => {
+                text.classList.remove('opacity-0');
+            });
+
+            // Cleanup text after a while (Roses stay!)
+            setTimeout(() => {
+                text.classList.add('opacity-0');
+                setTimeout(() => text.remove(), 500);
+            }, 4000);
+        }
+
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('button') || e.target.closest('a') || e.target.closest('nav')) return;
+            plantRose(e.clientX, e.clientY);
+        });
+
+        document.addEventListener('touchstart', (e) => {
+            if (e.target.closest('button') || e.target.closest('a') || e.target.closest('nav')) return;
+            const touch = e.touches[0];
+            plantRose(touch.clientX, touch.clientY);
+        }, { passive: true });
     </script>
-    {% block extra_js %}{% endblock %}
 </body>
 
 </html>

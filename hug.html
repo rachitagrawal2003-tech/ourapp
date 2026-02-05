@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hug Day - Feb 12</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { valentine: { 50: '#fdf2f8', 100: '#fce7f3', 200: '#fbcfe8', 300: '#f9a8d4', 400: '#f472b6', 500: '#ec4899', 600: '#db2777', 700: '#be185d', 800: '#9d174d', 900: '#831843', } }, fontFamily: { 'dancing': ['"Dancing Script"', 'cursive'], 'poppins': ['Poppins', 'sans-serif'], }, animation: { 'float': 'float 6s ease-in-out infinite', 'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite', }, keyframes: { float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-20px)' }, } } } } }
+    </script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style type="text/tailwindcss">
+        @layer utilities { .glass { @apply bg-white/30 dark:bg-black/30 backdrop-blur-md border border-white/20 dark:border-white/10; } } 
+    </style>
+</head>
+
+<body
+    class="bg-valentine-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-poppins min-h-screen transition-colors duration-300 overflow-x-hidden">
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden" id="bg-hearts"></div>
+    <nav class="fixed top-0 w-full z-50 glass shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="index.html"
+                class="text-2xl font-dancing font-bold text-valentine-600 dark:text-valentine-400 hover:scale-110 transition-transform"><i
+                    class="fas fa-heart text-red-500 animate-pulse"></i> Valentine's Week</a>
+            <button id="theme-toggle"
+                class="p-2 rounded-full hover:bg-valentine-100 dark:hover:bg-gray-800 transition-colors focus:outline-none"><i
+                    class="fas fa-moon dark:hidden text-valentine-800"></i><i
+                    class="fas fa-sun hidden dark:block text-yellow-400"></i></button>
+        </div>
+    </nav>
+    <main
+        class="relative z-10 pt-20 pb-10 container mx-auto px-4 min-h-screen flex flex-col justify-center items-center">
+        <div class="flex flex-col items-center justify-center min-h-[70vh] w-full">
+            <h1
+                class="text-4xl md:text-6xl font-dancing text-valentine-800 dark:text-valentine-200 mb-12 text-center animate-float">
+                Sending you a warm hug!</h1>
+            <div id="heart-btn" class="relative cursor-pointer group select-none">
+                <div class="absolute inset-0 bg-red-500 rounded-full animate-ping opacity-20"></div>
+                <div class="absolute inset-0 bg-red-500 rounded-full animate-ping opacity-20 delay-75"></div>
+                <i
+                    class="fas fa-heart text-[8rem] md:text-[12rem] text-red-500 transition-transform duration-200 group-hover:scale-110 group-active:scale-95 filter drop-shadow-2xl"></i>
+            </div>
+            <p class="mt-12 text-lg text-gray-600 dark:text-gray-300">Tap to feel the hug</p>
+        </div>
+    </main>
+    <footer class="relative z-10 glass py-4 text-center text-sm text-valentine-800 dark:text-valentine-200">
+        <p>Made with <i class="fas fa-heart text-red-500"></i> for You</p>
+    </footer>
+    <script>
+        const themeToggle = document.getElementById('theme-toggle'); const html = document.documentElement; if (localStorage.theme === 'dark') { html.classList.add('dark'); } else { html.classList.remove('dark'); } themeToggle.addEventListener('click', () => { html.classList.toggle('dark'); if (html.classList.contains('dark')) { localStorage.theme = 'dark'; } else { localStorage.theme = 'light'; } });
+        function createHeart() { const heart = document.createElement('div'); heart.classList.add('absolute', 'text-valentine-300', 'dark:text-valentine-800', 'opacity-20', 'animate-float'); heart.style.left = Math.random() * 100 + 'vw'; heart.style.animationDuration = Math.random() * 3 + 2 + 's'; heart.style.fontSize = Math.random() * 20 + 10 + 'px'; heart.innerHTML = '<i class="fas fa-heart"></i>'; heart.style.top = '100vh'; document.getElementById('bg-hearts').appendChild(heart); let pos = 100; const interval = setInterval(() => { if (pos < -10) { clearInterval(interval); heart.remove(); } else { pos -= 0.5; heart.style.top = pos + 'vh'; } }, 50); } setInterval(createHeart, 500);
+
+        const heartBtn = document.getElementById('heart-btn');
+        function vibrate() { if (navigator.vibrate) { navigator.vibrate([200, 100, 200]); } }
+        function createParticles(x, y) { for (let i = 0; i < 20; i++) { const particle = document.createElement('i'); particle.classList.add('fas', 'fa-heart', 'fixed', 'text-red-500', 'pointer-events-none', 'z-50'); particle.style.fontSize = Math.random() * 20 + 10 + 'px'; particle.style.left = x + 'px'; particle.style.top = y + 'px'; document.body.appendChild(particle); const angle = Math.random() * Math.PI * 2; const velocity = Math.random() * 150 + 50; const tx = Math.cos(angle) * velocity; const ty = Math.sin(angle) * velocity; particle.animate([{ transform: 'translate(0, 0) scale(1)', opacity: 1 }, { transform: `translate(${tx}px, ${ty}px) scale(0)`, opacity: 0 }], { duration: 1000, easing: 'cubic-bezier(0, .9, .57, 1)' }).onfinish = () => particle.remove(); } }
+        heartBtn.addEventListener('click', (e) => { vibrate(); let clientX = e.clientX, clientY = e.clientY; if (!clientX && !clientY) { const rect = heartBtn.getBoundingClientRect(); clientX = rect.left + rect.width / 2; clientY = rect.top + rect.height / 2; } createParticles(clientX, clientY); const heart = heartBtn.querySelector('i'); heart.classList.add('text-red-600'); setTimeout(() => heart.classList.remove('text-red-600'), 200); });
+        heartBtn.addEventListener('touchstart', (e) => { e.preventDefault(); vibrate(); const touch = e.touches[0]; createParticles(touch.clientX, touch.clientY); }, { passive: false });
+    </script>
+</body>
+
+</html>
