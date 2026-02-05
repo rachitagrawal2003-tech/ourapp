@@ -127,9 +127,11 @@
                     }
                 }
 
+                if (pixels.length === 0) return; // Safety check
+
                 const percentage = (transparentPixels / (pixels.length / 4)) * 100;
 
-                if (percentage > 40) { // If 40% scratched
+                if (percentage > 50) { // If 50% scratched
                     if (canvasId === 'scratch2') {
                         const btn = document.getElementById('spotify-btn');
                         btn.style.opacity = '1';
