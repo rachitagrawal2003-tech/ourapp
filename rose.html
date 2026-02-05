@@ -159,7 +159,7 @@
         const colors = ['text-red-500', 'text-pink-500', 'text-rose-500', 'text-red-600'];
 
         let clickCount = 0;
-        let isPlanting = false; // Debounce flag
+        let lastPlantTime = 0; // Timestamp based debounce
 
         // Embedded Reasons from reasons.txt
         const reasonsList = [
@@ -187,11 +187,11 @@
         const MAX_ROSES = 20;
 
         function plantRose(x, y) {
-            if (clickCount >= MAX_ROSES || isPlanting) return;
+            const now = Date.now();
+            // 500ms strict cooldown to prevent double taps
+            if (now - lastPlantTime < 500 || clickCount >= MAX_ROSES) return;
 
-            isPlanting = true;
-            setTimeout(() => { isPlanting = false; }, 300); // 300ms Cooldown
-
+            lastPlantTime = now;
             clickCount++;
 
             // Create Rose
@@ -236,6 +236,7 @@
             }, 4000);
         }
 
+        // Handle both Click and Touch, but debounce handles the duplicate
         document.addEventListener('click', (e) => {
             if (e.target.closest('button') || e.target.closest('a') || e.target.closest('nav')) return;
             plantRose(e.clientX, e.clientY);
@@ -243,10 +244,10 @@
 
         document.addEventListener('touchstart', (e) => {
             if (e.target.closest('button') || e.target.closest('a') || e.target.closest('nav')) return;
-            e.preventDefault(); // Prevent Mouse Emulation
+            // Removed preventDefault to allow scrolling if needed, rely on timestamp debounce
             const touch = e.touches[0];
             plantRose(touch.clientX, touch.clientY);
-        }, { passive: false }); // Passive false required for preventDefault
+        }, { passive: true });
     </script>
 </body>
 
